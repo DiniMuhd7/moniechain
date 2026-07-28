@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Farm Wizard App",
-    "slug": "farm-wizard-app",
+    "name": "MonieChain",
+    "slug": "moniechain",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "moniechain",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.grow.farmwizard",
+      "bundleIdentifier": "com.moniechain.app",
       "buildNumber": "11",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.grow.farmwizard",
+      "package": "com.moniechain.app",
       "versionCode": 11,
       "googleServicesFile": "./google-services.json"
     },

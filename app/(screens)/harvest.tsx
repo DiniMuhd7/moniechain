@@ -1,293 +1,35 @@
-import React, { useCallback, useEffect, useState } from "react";
-import BackgroundImage from "@/components/BackgroundImage";
-import { images } from "@/constants";
-import { View, Text, Image, Dimensions, Alert } from "react-native";
-import { CustomButton } from "../../components";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { usePlantGrowth } from "@/constants/plants";
-import { updatePlantLevels } from "@/services/user";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLoginContext } from "@/context/LoginProvider";
-import { useTranslation } from "react-i18next";
-import { Audio } from "expo-av";
-import { API_BASE } from "@/config/client";
-import RewardedAdComponent from "@/utils/RewardedAdComponent";
-import { canShowRewardedAd } from "@/utils/adLimit";
-import {
-  cancelPausedSessionReminder,
-  notifySessionComplete,
-} from "@/utils/notifications";
-import { recordEvent } from "@/utils/engagement";
-import { submitDailyScore } from "@/services/rewardsApi";
-import { dailyCrop } from "@/utils/dailyChallenge";
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
+import HeaderNavigation from '@/components/HeaderNavigation';
+import { icons } from '@/constants';
+import { useLoginContext } from '@/context/LoginProvider';
+import { hydrateWalletProfile, registerPhoneAlias } from '@/services/wallet';
 
-const REWARD_ADS_VIEW_LIMIT = 3;
-const AD_BONUS_POINTS = 50;
+export default function ReceiveUsdt() {
+  const { user } = useLoginContext();
+  const profile = hydrateWalletProfile(user || {});
 
-const { width, height } = Dimensions.get("window");
-
-const Harvest = () => {
-  const { user, setUser } = useLoginContext();
-  if (!user) {
-    router.replace("/");
-  }
-  const [isSubmitting, setSubmitting] = useState(false);
-  const [showRewardAd, setShowRewardAd] = useState(false);
-  const [bonusEarned, setBonusEarned] = useState(false);
-  const isPremiumUser = user?.isPremium === true;
-  const { name, userLevel, score, plantHealth } = useLocalSearchParams();
-  // const plant = plantGrowth.filter((plant) => plant.name === name)[0];
-  const plants = usePlantGrowth();
-  const plant = plants.find((plant) => plant.name === name);
-  const params = useLocalSearchParams();
-  const plantName = Array.isArray(params.name) ? params.name[0] : params.name;
-  if (!plant) {
-    router.replace("/(screens)/selectSeed");
-    return null;
-  }
-
-  let level = parseInt(userLevel as string) + 1; // next level
-  // bonus must stay numeric — it was a string (.toFixed) which forced the
-  // whole total into string concatenation, garbling/inflating payouts.
-  const bonus = Number(plantHealth) / 100;
-  // Harvest level bonus reduced (was 500/level) to keep WizPoint minting in
-  // line with the WZP->USD rate and the daily earning cap.
-  const totalSocre =
-    Number(score) + bonus + 100 * Number(userLevel);
-
-  const updateLevel = async () => {
-    if (!plant || !level || !score) {
-      Alert.alert("Error", "Some error occurs");
-      return;
-    }
-
-    setSubmitting(true);
-    const token = await AsyncStorage.getItem("token");
-    if (token !== null) {
-      try {
-        const result = await updatePlantLevels(
-          token,
-          plant.name,
-          level,
-          Number(totalSocre)
-        );
-
-        if (result.data.success === false) {
-          Alert.alert("Error", result.data.message);
-          return;
-        }
-        // Alert.alert(
-        //   "Success",
-        //   "Session completed & level upgraded successfully"
-        // );
-        setUser(result.data.updateUser);
-        // setTimeout(() => {
-        //   router.replace({
-        //     pathname: "/(screens)/profile",
-        //     params: { name },
-        //   });
-        // }, 3000);
-      } catch (error: any) {
-        Alert.alert("Error", error.message);
-      } finally {
-        setSubmitting(false);
-      }
-    }
-  };
-
-  // Credits the watch-ad bonus through the same backend endpoint the
-  // home screen uses for rewarded ads.
-  const handleAdBonusEarned = async () => {
-    const token = await AsyncStorage.getItem("token");
-    if (token === null) return;
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/user/reward-earned`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `JWT ${token}`,
-        },
-        body: JSON.stringify({ amount: AD_BONUS_POINTS }),
-      });
-      const json = await res.json();
-      if (json.userDetails) setUser(json.userDetails);
-      setBonusEarned(true);
-    } catch (err) {
-      console.warn("reward earn fetch error:", err);
-    }
-  };
-
-  const handleWatchAdPress = async () => {
-    const allowed = await canShowRewardedAd(REWARD_ADS_VIEW_LIMIT);
-    if (allowed) {
-      setShowRewardAd(true);
-    } else {
-      Alert.alert("Limit reached", "You have reached the daily ad limit.");
-    }
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      const stopAndPlayNewSound = async () => {
-        try {
-          // 1. Stop all previously playing sounds
-          await Audio.setIsEnabledAsync(false);
-          await Audio.setIsEnabledAsync(true);
-
-          // 2. Load and play a new sound
-          const { sound } = await Audio.Sound.createAsync(
-            require("@/assets/sounds/level-up.wav"),
-            {
-              volume: 0.01,
-              isLooping: false,
-            }
-          );
-
-          await sound.playAsync();
-
-          // Optional: unload the sound after it's done playing
-          sound.setOnPlaybackStatusUpdate((status) => {
-            if (status.isLoaded && status.didJustFinish) {
-              sound.unloadAsync();
-            }
-          });
-        } catch (e) {
-          console.warn("Error managing sound:", e);
-        }
-      };
-      const clearGame = async () => {
-        const raw = await AsyncStorage.getItem("gameStates");
-        const all = raw ? JSON.parse(raw) : {};
-
-        delete all[plantName];
-        await AsyncStorage.setItem("gameStates", JSON.stringify(all));
-
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-        await fetch(`${API_BASE}/api/v1/game-state/clear/${plantName}`, {
-          method: "DELETE",
-          headers: { Authorization: `JWT ${token}` },
-        });
-
-        // console.log(`Cleared local save for ${plantName}`);
-      };
-      updateLevel();
-      stopAndPlayNewSound();
-      clearGame();
-      // Session is done: clear the paused-session reminder and celebrate
-      cancelPausedSessionReminder();
-      notifySessionComplete(Number(Number(totalSocre).toFixed(2)));
-
-      // Engagement tracking: quests & achievements
-      recordEvent("session_played");
-      recordEvent("harvest");
-      recordEvent("level_up");
-      if (Number(plantHealth) >= 90) recordEvent("perfect_harvest");
-
-      // Daily challenge: if you played today's featured crop, submit the
-      // score to the daily leaderboard (best score per day is kept).
-      if (plantName === dailyCrop()) {
-        submitDailyScore(Number(Number(totalSocre).toFixed(2))).catch(() => {});
-      }
-    }, [])
-  );
-
-  const { t } = useTranslation();
+  useEffect(() => {
+    registerPhoneAlias(profile.phoneNumber, profile.walletAddress);
+  }, []);
 
   return (
-    <View className="flex-1 bg-green-200 items-center justify-start pt-20">
-      {/* Background */}
-      <BackgroundImage
-        source={images.bgRainfall}
-        style={{ width: "100%", height: "100%", position: "absolute" }}
-      />
-
-      {/* Title */}
-
-      <View className="items-center justify-center my-14">
-        <Text className="text-white text-3xl font-primary">
-          {" "}
-          {t("menu.session")}
-        </Text>
-        <Text className="text-white text-3xl font-primary">
-          {t("menu.completed")}
-        </Text>
-
-        <Image
-          source={images.sessionComplete}
-          style={{
-            width: width * 0.5,
-            height: width * 0.5,
-            marginBottom: 10,
-          }}
-          resizeMode="contain"
-        />
-
-        <Text className="text-center text-xl p-4 my-2 text-white">
-          {t("game.total_points")}
-        </Text>
-
-        <Text className="text-center text-5xl font-bold font-secondary p-4 text-[#FEDA42]">
-          {Number(totalSocre).toFixed(2)}
-          {/* {score} */}
-        </Text>
-        <Text className="text-center text-xl p-4 my-2 text-white">
-          {t("messages.harvest")}
-        </Text>
-
-        {!isPremiumUser && !bonusEarned && (
-          <CustomButton
-            title={`🎁 Watch Ad to Earn +${AD_BONUS_POINTS}`}
-            handlePress={handleWatchAdPress}
-            containerStyles="w-[310px] m-1"
-            textStyles={"font-pbold text-white"}
-            isLoading={showRewardAd}
-          />
-        )}
-        {bonusEarned && (
-          <Text className="text-center text-xl text-[#FEDA42] font-pbold">
-            +{AD_BONUS_POINTS} bonus points added!
-          </Text>
-        )}
-
-        <View className="flex-row justify-between gap-4 m-3">
-          <CustomButton
-            title={t("buttons.keep_going")}
-            handlePress={() => router.replace("/(screens)/selectSeed")}
-            containerStyles="w-[150px]"
-            textStyles={"font-pbold text-white"}
-            isLoading={isSubmitting}
-          />
-          <CustomButton
-            title={t("buttons.exit_to_menu")}
-            handlePress={() => router.replace("/(tabs)/home")}
-            containerStyles="w-[150px]"
-            textStyles={"font-pbold text-white"}
-            isLoading={isSubmitting}
-          />
+    <View className="flex-1 bg-[#071A2D] px-5 pt-10">
+      <HeaderNavigation onLeftPress={() => router.back()} onRightPress={() => null} leftIcon={icons.back} rightIcon={icons.settings} showLeftButton showRightButton={false} />
+      <Text className="text-white text-3xl font-pbold mt-6">Receive USDT</Text>
+      <Text className="text-slate-300 mt-2">Share your phone number or wallet address to receive verified USDT deposits.</Text>
+      <View className="bg-white rounded-[28px] p-6 mt-8 items-center">
+        <View className="w-56 h-56 bg-slate-100 rounded-3xl items-center justify-center border border-slate-200">
+          <Text className="text-7xl">▣</Text>
+          <Text className="text-slate-500 mt-2">MONIECHAIN QR</Text>
         </View>
-
-        {/* <CustomButton
-          title="Harvest"
-          handlePress={updateLevel}
-          containerStyles="w-[200px] mb-1"
-          textStyles={"font-pbold text-white"}
-          isLoading={isSubmitting}
-        /> */}
+        <Text className="text-[#071A2D] font-pbold mt-6 text-lg">{profile.phoneNumber}</Text>
+        <Text className="text-slate-500 text-center mt-2">{profile.walletAddress}</Text>
+        <TouchableOpacity className="bg-[#00C48C] rounded-2xl p-4 mt-6 w-full" onPress={() => router.push('/(screens)/transactionSuccess')}>
+          <Text className="text-white text-center font-pbold">Simulate received deposit</Text>
+        </TouchableOpacity>
       </View>
-
-      {showRewardAd && (
-        <RewardedAdComponent
-          onRewardEarned={() => {
-            handleAdBonusEarned();
-          }}
-          onClose={() => {
-            setShowRewardAd(false);
-          }}
-        />
-      )}
     </View>
   );
-};
-
-export default Harvest;
+}

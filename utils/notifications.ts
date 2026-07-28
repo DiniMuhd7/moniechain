@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { API_BASE } from "@/config/client";
 
-// Local push notifications driven by in-app events and game activity.
+// Local push notifications driven by wallet and account activity.
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -22,7 +22,7 @@ export const initNotifications = async () => {
   try {
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
-        name: "Farm Wizard",
+        name: "MonieChain",
         importance: Notifications.AndroidImportance.DEFAULT,
       });
     }
@@ -82,10 +82,10 @@ export const scheduleComeBackReminder = async () => {
     await Notifications.scheduleNotificationAsync({
       identifier: COME_BACK_ID,
       content: {
-        title: "🌱 Your farm misses you!",
-        body: "Come back to Farm Wizard — your crops are waiting to grow and earn you points.",
+        title: "Your MonieChain wallet is ready",
+        body: "Open MonieChain to review balances, payments, and on-chain USDT activity.",
       },
-      trigger: { seconds: 24 * 60 * 60 },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 24 * 60 * 60 },
     });
   } catch (e) {
     console.warn("Failed to schedule come-back reminder:", e);
@@ -101,12 +101,12 @@ export const schedulePausedSessionReminder = async (plantName?: string) => {
     await Notifications.scheduleNotificationAsync({
       identifier: PAUSED_SESSION_ID,
       content: {
-        title: "⏸️ Your session is paused",
+        title: "Payment draft paused",
         body: plantName
-          ? `Your ${plantName} is waiting — come back and finish growing it!`
-          : "Your plant is waiting — come back and finish the session!",
+          ? `Your ${plantName} flow is waiting for review.`
+          : "Return to MonieChain to finish the pending wallet action.",
       },
-      trigger: { seconds: 2 * 60 * 60 },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 2 * 60 * 60 },
     });
   } catch (e) {
     console.warn("Failed to schedule paused-session reminder:", e);
@@ -126,11 +126,11 @@ export const notifySessionComplete = async (points?: number) => {
   try {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "🎉 Session complete!",
+        title: "USDT transaction confirmed",
         body:
           points !== undefined
-            ? `Great harvest! You earned ${points} points. Play again to grow your balance.`
-            : "Great harvest! Play again to grow your balance.",
+            ? `${points} USDT has been confirmed on-chain.`
+            : "Your wallet activity has been confirmed on-chain.",
       },
       trigger: null, // immediate
     });
@@ -156,7 +156,7 @@ export const notifyNewAppNotifications = async (notifications: any[]) => {
 
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Farm Wizard",
+        title: "MonieChain",
         body: latest.message || "You have a new notification.",
       },
       trigger: null,

@@ -48,13 +48,13 @@ const SignIn = () => {
 
       if (!creds) {
         const deviceId = uuid.v4().replace(/-/g, "").slice(0, 10);
-        const deviceName = (Constants.deviceName || "Wizard")
+        const deviceName = (Constants.deviceName || "MonieChain")
           .replace(/[^a-zA-Z0-9 ]/g, "")
           .trim()
           .slice(0, 18);
         creds = {
-          fullName: `${deviceName || "Wizard"} ${deviceId.slice(0, 4)}`,
-          email: `guest-${deviceId}@farmwizard.app`.toLowerCase(),
+          fullName: `${deviceName || "MonieChain"} ${deviceId.slice(0, 4)}`,
+          email: `guest-${deviceId}@moniechain.app`.toLowerCase(),
           password: String(uuid.v4()),
         };
         const reg = await signUpUser(
@@ -162,7 +162,7 @@ const SignIn = () => {
           </View>
 
           {/* <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
-            Log in to Farm Wizard
+            Log in to Farm MonieChain
           </Text> */}
 
           <FormField
