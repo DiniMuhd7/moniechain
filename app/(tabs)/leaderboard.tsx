@@ -34,6 +34,7 @@ export default function Activity() {
               <Text className="text-slate-500">{tx.createdAt} • {tx.network} • fee {tx.fee} USDT</Text>
               <Text className="text-[#00A878] mt-1">{tx.hash} • {tx.status}</Text>
             </View>
+            <View className="flex-row justify-between mt-4 pt-4 border-t border-slate-100"><Text className="text-slate-500">{tx.createdAt}</Text><Text className="text-[#00A878]">{tx.hash} • {tx.status}</Text></View>
           </View>
         ))}
       </ScrollView>
