@@ -1,69 +1,31 @@
-import React from "react";
-import { View, Pressable, Image } from "react-native";
-import { icons, images } from "@/constants";
-import Svg, { Path } from "react-native-svg";
-import { router } from "expo-router";
-import { playSound } from "@/utils/audio";
-
-export function WavyBackground() {
-  return (
-    <View className="absolute bottom-0 w-full h-24">
-      <Svg height="100%" width="100%" viewBox="0 0 1440 320">
-        <Path
-          fill="#2C6C3B"
-          d="M0,96 C240,160 480,0 720,96 C960,192 1200,96 1440,128 L1440,320 L0,320 Z"
-        />
-      </Svg>
-    </View>
-  );
-}
+import React from 'react';
+import { View, Pressable, Text } from 'react-native';
+import { router } from 'expo-router';
+import { playSound } from '@/utils/audio';
 
 const tap = (path: string) => {
   router.push(path as any);
-  playSound(require("@/assets/sounds/click.mp3"), 0.05);
+  playSound(require('@/assets/sounds/click.mp3'), 0.05);
 };
+
+const tabs = [
+  { label: 'Wallet', path: '/(tabs)/profile', icon: '◎' },
+  { label: 'Home', path: '/(tabs)/home', icon: '₮', primary: true },
+  { label: 'Activity', path: '/(tabs)/leaderboard', icon: '↔' },
+];
 
 export default function CustomBottomTab() {
   return (
-    <View className="absolute -bottom-2 w-full">
-      {/* <WavyBackground /> */}
-      <Image source={images.bgTabs} className="absolute bottom-2 w-full h-16" />
-      <View className="absolute bottom-2 w-full h-24 flex-row justify-between items-end px-8 pt-6">
-        {/* Left Tab */}
-        <Pressable
-          className="w-16 h-16 rounded-full bg-[#d1a635] items-center justify-center border-2 border-white"
-          onPress={() => tap("/(tabs)/profile")}
-        >
-          <Image
-            source={icons.claim}
-            className="w-12 h-12"
-            style={{ tintColor: "#fff" }}
-          />
-        </Pressable>
-
-        {/* Center Tab */}
-        <Pressable
-          className="w-20 h-20 rounded-full bg-[#d1a635] items-center justify-center border-4 border-white mb-2 shadow-lg shadow-black"
-          onPress={() => tap("/(tabs)/home")}
-        >
-          <Image
-            source={icons.home}
-            className="w-10 h-10"
-            style={{ tintColor: "#fff" }}
-          />
-        </Pressable>
-
-        {/* Right Tab */}
-        <Pressable
-          className="w-16 h-16 rounded-full bg-[#d1a635] items-center justify-center border-2 border-white"
-          onPress={() => tap("/(tabs)/leaderboard")}
-        >
-          <Image
-            source={icons.stats}
-            className="w-8 h-8"
-            style={{ tintColor: "#fff" }}
-          />
-        </Pressable>
+    <View className="absolute bottom-4 w-full px-6">
+      <View className="h-20 rounded-[28px] bg-[#071A2D]/95 border border-white/10 flex-row justify-between items-center px-7 shadow-lg">
+        {tabs.map((item) => (
+          <Pressable key={item.label} className="items-center justify-center" onPress={() => tap(item.path)}>
+            <View className={`${item.primary ? 'w-16 h-16 -mt-8 bg-[#00C48C]' : 'w-12 h-12 bg-white/10'} rounded-2xl items-center justify-center border border-white/10`}>
+              <Text className="text-white text-2xl font-pbold">{item.icon}</Text>
+            </View>
+            <Text className="text-white text-[11px] mt-1">{item.label}</Text>
+          </Pressable>
+        ))}
       </View>
     </View>
   );

@@ -1,50 +1,15 @@
-# Welcome to your Expo app 👋
+# MonieChain
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+MonieChain is a blockchain-powered fintech mobile app built with Expo and React Native. It replaces the original Farm Wizard game flow with a professional USDT wallet experience: phone-number-based wallet identity, digital payments, peer-to-peer transfers, QR merchant payments, savings vaults, transaction history, KYC, notifications, and security/account management.
 
-## Get started
+## Core concept
 
-1. Install dependencies
+Every registered user receives a USDT wallet address that is permanently mapped to their unique phone number. The UI abstracts wallet complexity so users can send and receive USDT using familiar mobile-money flows while transaction records remain anchored to an on-chain ledger.
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project..........
-
-When you're ready, run:
+## Development
 
 ```bash
-npm run reset-project
+npm install
+npm run lint
+npm start
 ```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
