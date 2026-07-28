@@ -26,6 +26,7 @@ const SignUp = () => {
   const [selectedCountry, setSelectedCountry] = useState('ng')
   const [form, setForm] = useState({
     email: "",
+    phoneNumber: "",
     password: "",
     cpassword: ""
   });
@@ -55,12 +56,12 @@ const SignUp = () => {
       // console.log("Submitting ✅", { ...form, selectedLanguage, selectedCountry });
       setSubmitting(true);
       try {
-        const result = await signUpUser(form.fullName, (form.email).toLowerCase(), form.password, selectedLanguage, selectedCountry, selectedIndex);
+        const result = await signUpUser(form.fullName, (form.email).toLowerCase(), form.password, selectedLanguage, selectedCountry, selectedIndex, form.phoneNumber);
         if (result.status !== 200 || result.data.success === false) {
           Alert.alert("Error", result.data.message)
           return;
         }
-        Alert.alert("Success", result.data.message);
+        Alert.alert("Wallet created", result.data.message || "Your MonieChain USDT wallet has been mapped to your phone number.");
         // setUser(result.data.user);
         // setIsLogged(true);
         setTimeout(() => {
@@ -125,10 +126,10 @@ const SignUp = () => {
           className="w-[100px] h-[100px]"
         />
         <Text className="text-lg font-semibold text-white font-psemibold">
-          Sign Up to Farm Wizard
+          Sign Up to MonieChain
         </Text>
       </View> */}
-      <Text className="text-white text-3xl font-primary mb-2">CREATE ACCOUNT</Text>
+      <Text className="text-white text-3xl font-primary mb-2">JOIN MONIECHAIN</Text>
 
       {/* Avatar Selector */}
       <View className="flex-row items-center gap-5 mb-6 p-2">
@@ -184,6 +185,16 @@ const SignUp = () => {
             keyboardType="email-address"
           />
           {errors.email && <Text className="text-red-400 text-sm mt-1">{errors.email}</Text>}
+
+          <FormField
+            title="Phone number"
+            value={form.phoneNumber}
+            placeholder="e.g. +234 801 000 0000"
+            handleChangeText={(e) => setForm({ ...form, phoneNumber: e })}
+            otherStyles="mt-2"
+            keyboardType="phone-pad"
+          />
+          <Text className="text-slate-100 text-xs mt-1">This number becomes your permanent USDT wallet alias.</Text>
 
           <FormField
             title={t("password")}

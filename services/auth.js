@@ -7,7 +7,8 @@ export const signUpUser = async (
   password,
   selectedLanguage,
   selectedCountry,
-  selectedIndex
+  selectedIndex,
+  phoneNumber
   // notification_token
 ) => {
   try {
@@ -21,6 +22,7 @@ export const signUpUser = async (
         language: selectedLanguage,
         notification_token: "totif-token",
         avatar: selectedIndex,
+        phoneNumber,
       },
       {
         headers: {
