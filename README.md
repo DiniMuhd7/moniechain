@@ -1,6 +1,6 @@
 # MonieChain
 
-MonieChain is a blockchain-powered fintech mobile app built with Expo and React Native. It replaces the original Farm Wizard game flow with a professional USDT wallet experience: phone-number-based wallet identity, digital payments, peer-to-peer transfers, QR merchant payments, savings vaults, transaction history, KYC, notifications, and security/account management.
+MonieChain is a blockchain-powered fintech mobile app built with Expo and React Native. It provides a professional USDT wallet experience: phone-number-based wallet identity, digital payments, peer-to-peer transfers, QR merchant payments, savings vaults, transaction history, KYC, notifications, and security/account management.
 
 ## Core concept
 
