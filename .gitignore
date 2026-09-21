@@ -37,4 +37,5 @@ yarn-error.*
 
 app-example
 
-backend/
+# The API source is part of this repository. Its dependencies and environment
+# files are ignored by the backend-specific .gitignore.

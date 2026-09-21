@@ -33,8 +33,8 @@ export const signUpUser = async (
     );
 
     if (response.status === 200 && response.data.success) {
-      const token = response.data.token;
-      //await AsyncStorage.setItem("token", token);
+      const token = response.data.data?.token;
+      if (token) await AsyncStorage.setItem("token", token);
     }
     return response;
   } catch (error) {
