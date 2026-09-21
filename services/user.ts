@@ -110,10 +110,9 @@ export const submitConversion = async (token: string, amount: number) => {
     throw error;
   }
 };
-export const deleteUser = async (token: string, email: string) => {
+export const deleteUser = async (token: string) => {
   try {
-    const response = await client.get(`/user/delete/${email}`, {
-      // const response = await client.delete(`/user/delete/${email}`, {
+    const response = await client.delete("/user/me", {
       headers: {
         Authorization: `JWT ${token}`,
         "Content-Type": "application/json",
